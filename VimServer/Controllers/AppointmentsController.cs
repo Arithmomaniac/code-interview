@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,11 +12,11 @@ namespace VimServer.Controllers
     public class AppointmentsController : ControllerBase
     {
 
-        private readonly IProviderRepository _providerRepository;
+        private readonly IAppointmentsService _appointmentsService;
 
-        public AppointmentsController(IProviderRepository providerRepository)
+        public AppointmentsController(IAppointmentsService appointmentsService)
         {
-            _providerRepository = providerRepository;
+            _appointmentsService = appointmentsService;
         }
 
         [HttpGet]
@@ -30,13 +29,7 @@ namespace VimServer.Controllers
             if (minScore < 0 || minScore > 10)
                 return BadRequest();
 
-            var results = _providerRepository.GetProviders()
-                .Where(x => x.Score >= minScore) //Threshold;
-                .Where(x => x.Specialties.Contains(specialty, StringComparer.OrdinalIgnoreCase)) //Specialty
-                .Where(x => x.AvailableDates.Any(y => y.From <= date && y.To >= date)) //Availablity
-                .OrderByDescending(x => x.Score) //Ordering
-                .Select(x => x.Name)
-                .ToList(); //result
+            var results = _appointmentsService.GetAvailableProviders(specialty, date, minScore);
 
             return Ok(results);
         }
@@ -46,10 +39,7 @@ namespace VimServer.Controllers
         {
             var date = request.Date;
 
-            var canBook = _providerRepository.GetProviders()
-                .Where(x => x.Name == request.Name)
-                .Where(x => x.AvailableDates.Any(y => y.From <= date && y.To >= date))
-                .Any();
+            var canBook = _appointmentsService.TryBookAppointment(request.Name, request.Date);
 
             if (!canBook)
             {
