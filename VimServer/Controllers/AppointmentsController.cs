@@ -20,16 +20,9 @@ namespace VimServer.Controllers
         }
 
         [HttpGet]
-        public ActionResult Get([FromQuery] string specialty, [FromQuery] long date, [FromQuery] double minScore)
+        public ActionResult Get([FromQuery] AppointmentsQuery appointmentsQuery)
         {
-            if (string.IsNullOrWhiteSpace(specialty))
-                return BadRequest();
-            if (date <= 0)
-                return BadRequest();
-            if (minScore < 0 || minScore > 10)
-                return BadRequest();
-
-            var results = _appointmentsService.GetAvailableProviders(specialty, date, minScore);
+            var results = _appointmentsService.GetAvailableProviders(appointmentsQuery.Specialty, appointmentsQuery.Date, appointmentsQuery.MinScore);
 
             return Ok(results);
         }
@@ -37,8 +30,6 @@ namespace VimServer.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] AppointmentRequest request)
         {
-            var date = request.Date;
-
             var canBook = _appointmentsService.TryBookAppointment(request.Name, request.Date);
 
             if (!canBook)
@@ -50,9 +41,21 @@ namespace VimServer.Controllers
         }
     }
 
+    public class AppointmentsQuery
+    {
+        [Required]
+        public string Specialty { get; set; }
+        [Range(0, long.MaxValue)]
+        public long Date { get; set; }
+        [Range(0, 10)]
+        public double MinScore { get; set; }
+    }
+
     public class AppointmentRequest
     {
+        [Required]
         public string Name { get; set; }
+        [Range(0, long.MaxValue)]
         public long Date { get; set; }
     }
 }
