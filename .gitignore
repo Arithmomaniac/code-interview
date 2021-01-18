@@ -59,3 +59,7 @@ typings/
 
 # next.js build output
 .next
+/VimServer/bin/Debug/netcoreapp3.1
+/VimServer/obj/Debug/netcoreapp3.1
+/VimServer/obj
+/.vs
