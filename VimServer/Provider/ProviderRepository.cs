@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace VimServer
 {
-    public class ProviderRepository
+    public class ProviderRepository : IProviderRepository
     {
         static readonly Lazy<IReadOnlyCollection<Provider.Provider>> providers = new Lazy<IReadOnlyCollection<Provider.Provider>>(() =>
         {
