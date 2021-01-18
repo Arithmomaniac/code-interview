@@ -27,6 +27,8 @@ namespace VimServer.Controllers
                 return BadRequest();
             if (date <= 0)
                 return BadRequest();
+            if (minScore < 0 || minScore > 10)
+                return BadRequest();
 
             var results = _providerRepository.GetProviders()
                 .Where(x => x.Score >= minScore) //Threshold;
